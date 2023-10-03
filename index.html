@@ -1,0 +1,248 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+    <title>Ether Application</title>
+</head>
+
+<body>
+    <h1 id="name"></h1>
+    <button id="connect">Connect to Wallet</button>
+    <div>
+        <br><br>
+        <input type="text" name="" id="amount">
+        <button id="rcvEth">Receive Ethers</button>
+        <br><br>
+        <button id="shwContractBalance">Show Contract Balance</button>
+        <h3 id="contractBlnc"></h3>
+        <br>
+    </div>
+    <div>
+        <label for="">Enter Name :</label>
+        <input type="text" name="" id="userName">
+        <br><br><label for="">Enter Amount :</label>
+        <input type="text" name="" id="amounts">
+        <br><br><label for="">Enter Address :</label>
+        <input type="text" name="" id="address">
+        <br><br>
+        <button id="userEt">Sent Eth To User</button>
+    </div>
+    <table border="1" id="showEventsData">
+        <tr>
+            <th>S.No</th>
+            <th>Name</th>
+            <th>Amount</th>
+            <th>Block No</th>
+            <th>Address</th>
+        </tr>
+    </table>
+
+
+
+</body>
+<script>
+    let cmnd = window.ethereum;
+    let contractAddres = "0x1A076518E9fA6b5748B0AdeAA200F38E1d31EdBb";
+    let contractAbi = [
+        {
+            "inputs": [],
+            "name": "receiveBalance",
+            "outputs": [],
+            "stateMutability": "payable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "_user",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "amount",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "string",
+                    "name": "_name",
+                    "type": "string"
+                }
+            ],
+            "name": "sendEthUser",
+            "outputs": [],
+            "stateMutability": "payable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "_num",
+                    "type": "uint256"
+                }
+            ],
+            "name": "setValue",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": false,
+                    "internalType": "string",
+                    "name": "name",
+                    "type": "string"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "amount",
+                    "type": "uint256"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "address",
+                    "name": "addr",
+                    "type": "address"
+                }
+            ],
+            "name": "showDetail",
+            "type": "event"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "_address",
+                    "type": "address"
+                }
+            ],
+            "name": "accountBalance",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "contractBalance",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "getValue",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "name",
+            "outputs": [
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }
+    ];
+    if (cmnd) {
+        let provider = new ethers.providers.Web3Provider(cmnd);
+        let signer = provider.getSigner();
+        let contract = new ethers.Contract(contractAddres, contractAbi, signer);
+        let amount = document.getElementById("amount");
+        let connect = document.getElementById("connect");
+        let rcvEth = document.getElementById("rcvEth");
+        let contractBlnc = document.getElementById("contractBlnc");
+        let shwContractBalance = document.getElementById("shwContractBalance");
+        let name = document.getElementById("name");
+        let userAmount = document.getElementById("amounts");
+        let userAddress = document.getElementById("address");
+        let userEt = document.getElementById("userEt");
+        let userName = document.getElementById("userName");
+        let dataTable = document.getElementById("showEventsData");
+        let Connect = async () => {
+            try {
+                let req = await provider.send("eth_requestAccounts", []);
+                console.log(nam);
+            } catch (e) {
+                console.log(e);
+            }
+
+        }
+        let contractName = async () => {
+            let names = await contract.name();
+            name.innerHTML = `Contract Name: ${names}`;
+
+        }
+        contractName();
+        let contractBalance = async () => {
+            let balance = await contract.contractBalance();
+            contractBlnc.innerHTML = `Contract Balance :${ethers.utils.formatEther(balance)} Eth`;
+        }
+        let receiveEth = async () => {
+            await contract.receiveBalance({ value: ethers.utils.parseEther(amount.value) });
+            contractBalance();
+        }
+        let showAllEvents = async () => {
+            let count = 0;
+            let shwEvents = await contract.queryFilter("showDetail");
+            console.log(shwEvents);
+            shwEvents.map(data => {
+                dataTable.innerHTML += `<tr>
+                    <th>${++count}</th>
+                    <th>${data.args.name}</th>
+                     <th>${ethers.utils.formatEther(data.args.amount)}</th>
+                     <th>${data.blockNumber}</th>
+                     <td>${data.args.addr}</td></tr>`
+                console.log(data.blockNumber);
+                console.log(data.args.name);
+                console.log(ethers.utils.formatEther(data.args.amount));
+                console.log(data.args.addr);
+            })
+
+        }
+        let senEthToUser = async () => {
+            console.log(userAmount.value);
+            await contract.sendEthUser(userAddress.value, ethers.utils.parseEther(userAmount.value), userName.value);
+        }
+        showAllEvents();
+        connect.addEventListener("click", Connect);
+        rcvEth.addEventListener("click", receiveEth);
+        shwContractBalance.addEventListener("click", contractBalance);
+        userEt.addEventListener("click", senEthToUser);
+
+
+    } else {
+        console.log("Install MetaMask")
+    }
+</script>
+
+</html>
